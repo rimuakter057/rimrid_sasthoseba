@@ -153,24 +153,23 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
   }
 
   Future<void> _confirmUnmarkTaken(MedicineReminder reminder, bool isBangla) async {
+    final strings = AppStrings(isBangla);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Text(
-          isBangla ? 'স্ট্যাটাস রিসেট করবেন?' : 'Reset Taken Status?',
+          strings.resetStatusDialogTitle,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         content: Text(
-          isBangla
-              ? 'ভুলবশত কি "খেয়েছি" চাপ লেগেছিল? আপনি চাইলে এটিকে পুনরায় না-খাওয়া অবস্থায় ফিরিয়ে নিতে পারেন।'
-              : 'Did you mark this by mistake? You can reset it back to pending.',
-          style: const TextStyle(fontSize: 13, color: Color(0xFF475569)),
+          strings.resetStatusDialogBody,
+          style: const TextStyle(fontSize: 13, color: const Color(0xFF475569)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(isBangla ? 'বাতিল' : 'Cancel'),
+            child: Text(strings.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -179,7 +178,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(isBangla ? 'হ্যাঁ, রিসেট করুন' : 'Reset'),
+            child: Text(strings.yesResetBtn),
           ),
         ],
       ),
@@ -195,9 +194,11 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
     if (reminder.id == null) return;
     await DatabaseHelper.instance.markReminderTaken(reminder.id!, DateTime.now());
     if (mounted) {
+      final isBangla = LanguageController.instance.isBangla;
+      final strings = AppStrings(isBangla);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ ${reminder.medicineName} ওষুধটি খাওয়া সম্পন্ন হয়েছে'),
+          content: Text(strings.reminderTakenSuccess(reminder.medicineName)),
           backgroundColor: const Color(0xFF0A6847),
           duration: const Duration(seconds: 2),
         ),
@@ -210,14 +211,17 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
     await DatabaseHelper.instance.deleteReminder(id);
     await NotificationService.instance.cancelReminder(id);
     if (mounted) {
+      final isBangla = LanguageController.instance.isBangla;
+      final strings = AppStrings(isBangla);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$name রিমাইন্ডার মুছে ফেলা হয়েছে')),
+        SnackBar(content: Text(strings.reminderDeletedSuccess(name))),
       );
     }
     _loadReminders();
   }
 
   Future<void> _testInstantNotification(bool isBangla) async {
+    final strings = AppStrings(isBangla);
     await NotificationService.instance.showInstantNotification(
       title: isBangla ? '🔔 নাপা ৫০০ মিগ্রা খাওয়ার সময় হয়েছে!' : '🔔 Time for Napa 500mg!',
       body: isBangla ? 'সকাল — ১টি ট্যাবলেট (ভরা পেটে সেবন করুন)' : 'Morning — 1 Tablet (After meal)',
@@ -225,11 +229,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isBangla
-                ? 'টেস্ট নোটিফিকেশন পাঠানো হয়েছে! ফোনের নোটিফিকেশন বার চেক করুন।'
-                : 'Test notification sent! Check your notification tray.',
-          ),
+          content: Text(strings.testNotificationSentMsg),
           backgroundColor: const Color(0xFF0A6847),
         ),
       );
@@ -271,9 +271,11 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
     String? prefillDosage,
     String? prefillMeal,
   }) {
+    final isBangla = LanguageController.instance.isBangla;
+    final strings = AppStrings(isBangla);
     final nameController = TextEditingController(text: prefillMedicine ?? '');
-    final dosageController = TextEditingController(text: prefillDosage ?? '১টি ট্যাবলেট');
-    String mealTiming = prefillMeal ?? 'খাবারের পরে';
+    final dosageController = TextEditingController(text: prefillDosage ?? (isBangla ? '১টি ট্যাবলেট' : '1 Tablet'));
+    String mealTiming = prefillMeal ?? strings.mealAfter;
     TimeOfDay selectedTime = const TimeOfDay(hour: 8, minute: 0);
     bool isMorning = true;
     bool isNoon = false;
@@ -313,9 +315,9 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          '🔔 নতুন ওষুধের রিমাইন্ডার',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        Text(
+                          strings.addReminderSheetTitle,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close_rounded),
@@ -326,12 +328,12 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                     const SizedBox(height: 14),
 
                     // Medicine Name
-                    const Text('ওষুধের নাম:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+                    Text(strings.medNameFieldLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
                     const SizedBox(height: 6),
                     TextField(
                       controller: nameController,
                       decoration: InputDecoration(
-                        hintText: 'যেমন: Napa 500mg, Seclo 20mg...',
+                        hintText: strings.medNameFieldHint,
                         filled: true,
                         fillColor: const Color(0xFFF1F5F9),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -341,12 +343,12 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                     const SizedBox(height: 14),
 
                     // Dosage
-                    const Text('পরিমাণ বা মাত্রা (Dosage):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+                    Text(strings.dosageFieldLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
                     const SizedBox(height: 6),
                     TextField(
                       controller: dosageController,
                       decoration: InputDecoration(
-                        hintText: 'যেমন: ১টি ট্যাবলেট, ২ চামচ...',
+                        hintText: strings.dosageFieldHint,
                         filled: true,
                         fillColor: const Color(0xFFF1F5F9),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -356,11 +358,11 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                     const SizedBox(height: 16),
 
                     // Meal Timing Chips
-                    const Text('খাওয়ার নিয়ম:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+                    Text(strings.mealTimingFieldLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      children: ['খাবারের আগে', 'খাবারের পরে', 'খাবারের সাথে'].map((timing) {
+                      children: [strings.mealBefore, strings.mealAfter, strings.mealWith].map((timing) {
                         final isSelected = mealTiming == timing;
                         return ChoiceChip(
                           label: Text(timing),
@@ -380,7 +382,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                     const SizedBox(height: 16),
 
                     // Time Slot Presets & Custom Time Picker
-                    const Text('সময় নির্ধারণ করুন:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+                    Text(strings.setTimeFieldLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -405,11 +407,11 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                                   Icon(Icons.wb_sunny_rounded, size: 20, color: isMorning ? Colors.white : Colors.grey.shade600),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'সকাল',
+                                    strings.slotMorning,
                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isMorning ? Colors.white : Colors.grey.shade800),
                                   ),
                                   Text(
-                                    '০৮:০০ AM',
+                                    isBangla ? '০৮:০০ AM' : '08:00 AM',
                                     style: TextStyle(fontSize: 10, color: isMorning ? Colors.white70 : Colors.grey.shade600),
                                   ),
                                 ],
@@ -439,11 +441,11 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                                   Icon(Icons.light_mode_rounded, size: 20, color: isNoon ? Colors.white : Colors.grey.shade600),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'দুপুর',
+                                    strings.slotNoon,
                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isNoon ? Colors.white : Colors.grey.shade800),
                                   ),
                                   Text(
-                                    '০২:০০ PM',
+                                    isBangla ? '০২:০০ PM' : '02:00 PM',
                                     style: TextStyle(fontSize: 10, color: isNoon ? Colors.white70 : Colors.grey.shade600),
                                   ),
                                 ],
@@ -473,11 +475,11 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                                   Icon(Icons.nightlight_round, size: 20, color: isNight ? Colors.white : Colors.grey.shade600),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'রাত',
+                                    strings.slotNight,
                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isNight ? Colors.white : Colors.grey.shade800),
                                   ),
                                   Text(
-                                    '০৯:০০ PM',
+                                    isBangla ? '০৯:০০ PM' : '09:00 PM',
                                     style: TextStyle(fontSize: 10, color: isNight ? Colors.white70 : Colors.grey.shade600),
                                   ),
                                 ],
@@ -493,7 +495,9 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                     OutlinedButton.icon(
                       icon: const Icon(Icons.access_time_filled_rounded, size: 18, color: Color(0xFF0A6847)),
                       label: Text(
-                        'নির্দিষ্ট সময় পরিবর্তন করুন: ${selectedTime.format(context)}',
+                        isBangla
+                            ? 'নির্দিষ্ট সময় পরিবর্তন করুন: ${selectedTime.format(context)}'
+                            : 'Change Exact Time: ${selectedTime.format(context)}',
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0A6847)),
                       ),
                       style: OutlinedButton.styleFrom(
@@ -531,7 +535,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                           final name = nameController.text.trim();
                           if (name.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('অনুগ্রহ করে ওষুধের নাম লিখুন')),
+                              SnackBar(content: Text(isBangla ? 'অনুগ্রহ করে ওষুধের নাম লিখুন' : 'Please enter medicine name')),
                             );
                             return;
                           }
@@ -558,18 +562,22 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                           final now = DateTime.now();
                           final isToday = (selectedTime.hour > now.hour) ||
                               (selectedTime.hour == now.hour && selectedTime.minute > now.minute);
-                          final dayText = isToday ? 'আজকে' : 'আগামীকাল';
+                          final dayText = isToday ? (isBangla ? 'আজকে' : 'Today') : (isBangla ? 'আগামীকাল' : 'Tomorrow');
 
                           nav.pop();
                           messenger.showSnackBar(
                             SnackBar(
-                              content: Text('🔔 $name এর রিমাইন্ডার সেট করা হয়েছে ($dayText ${savedReminder.formattedTime} থেকে বাজবে)'),
+                              content: Text(
+                                isBangla
+                                    ? '🔔 $name এর রিমাইন্ডার সেট করা হয়েছে ($dayText ${savedReminder.formattedTime} থেকে বাজবে)'
+                                    : '🔔 Reminder set for $name ($dayText at ${savedReminder.formattedTime})',
+                              ),
                               backgroundColor: const Color(0xFF0A6847),
                             ),
                           );
                           _loadReminders();
                         },
-                        child: const Text('রিমাইন্ডার সেভ করুন', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        child: Text(strings.saveReminderBtn, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -588,6 +596,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
         final now = DateTime.now();
         final takenCount = _reminders.where((r) => r.isTakenToday(now)).length;
 
@@ -596,23 +605,19 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
           appBar: AppBar(
             backgroundColor: const Color(0xFF0A6847),
             title: Text(
-              isBangla ? 'ওষুধের রিমাইন্ডার ও রুটিন' : 'Medicine Reminders & Routine',
+              strings.reminderTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.notifications_active_rounded),
-                tooltip: isBangla ? 'টেস্ট নোটিফিকেশন' : 'Test notification',
+                tooltip: strings.testNotificationTooltip,
                 onPressed: () => _testInstantNotification(isBangla),
               ),
-              // Firebase FCM Token (Temporarily commented out - local notification mode active)
-              /*
-              IconButton(
-                icon: const Icon(Icons.cloud_sync_rounded),
-                tooltip: 'Firebase FCM Token',
-                onPressed: _showTokenDialog,
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Center(child: LanguageToggleButton()),
               ),
-              */
             ],
           ),
           floatingActionButton: FloatingActionButton.extended(
@@ -620,7 +625,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add_alarm_rounded),
             label: Text(
-              isBangla ? 'নতুন রিমাইন্ডার' : 'Add Reminder',
+              strings.addReminderFab,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             onPressed: () => _showAddReminderDialog(),
@@ -655,7 +660,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                isBangla ? 'আজকের ওষুধ খাওয়ার অগ্রগতি' : 'Today\'s Medication Progress',
+                                strings.todayMedProgress,
                                 style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                               ),
                               Container(
@@ -665,7 +670,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  isBangla ? '$takenCount / ${_reminders.length} সম্পন্ন' : '$takenCount / ${_reminders.length} Taken',
+                                  strings.progressStatus(takenCount, _reminders.length),
                                   style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -683,9 +688,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            isBangla
-                                ? 'সময়মতো ওষুধ খেলে অ্যালার্ম বাজবে। খাওয়ার পর "খেয়েছি" চাপুন।'
-                                : 'Reminders notify on schedule. Tap "Mark Taken" when ingested.',
+                            strings.reminderBannerHelp,
                             style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 11),
                           ),
                         ],
@@ -708,7 +711,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                isBangla ? 'নোটিফিকেশন ও অ্যালার্ম চেক করতে চান?' : 'Want to verify notification sound & popup?',
+                                strings.testNotificationBannerPrompt,
                                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF166534)),
                               ),
                             ),
@@ -722,7 +725,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                               ),
                               onPressed: () => _testInstantNotification(isBangla),
                               child: Text(
-                                isBangla ? 'এখনই টেস্ট' : 'Test Now',
+                                strings.testNowBtn,
                                 style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -751,14 +754,12 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      isBangla ? 'কোনো সক্রিয় রিমাইন্ডার নেই' : 'No Active Reminders',
+                                      strings.noActiveRemindersTitle,
                                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
-                                      isBangla
-                                          ? 'নিচের "নতুন রিমাইন্ডার" বোতামে চাপ দিয়ে প্রতিদিনের ওষুধ খাওয়ার সময় সেট করুন।'
-                                          : 'Tap "Add Reminder" button below to schedule daily medicine alarms.',
+                                      strings.noActiveRemindersSubtitle,
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
                                     ),
@@ -801,8 +802,8 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                                                 reminder.isMorning
                                                     ? Icons.wb_sunny_rounded
                                                     : reminder.isNoon
-                                                        ? Icons.light_mode_rounded
-                                                        : Icons.nightlight_round,
+                                                    ? Icons.light_mode_rounded
+                                                    : Icons.nightlight_round,
                                                 size: 20,
                                                 color: isTaken ? const Color(0xFF16A34A) : const Color(0xFF0A6847),
                                               ),
@@ -816,7 +817,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                                                 ),
                                               ),
                                               Text(
-                                                reminder.slotBangla,
+                                                reminder.slot(isBangla),
                                                 style: TextStyle(
                                                   fontSize: 10,
                                                   color: isTaken ? const Color(0xFF166534) : Colors.grey.shade600,
@@ -884,7 +885,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                                                         const Icon(Icons.check_circle_rounded, size: 15, color: Color(0xFF16A34A)),
                                                         const SizedBox(width: 4),
                                                         Text(
-                                                          isBangla ? 'আজকে খাওয়া হয়েছে' : 'Taken Today',
+                                                          strings.takenTodayTag,
                                                           style: const TextStyle(fontSize: 11, color: Color(0xFF16A34A), fontWeight: FontWeight.bold),
                                                         ),
                                                         const SizedBox(width: 4),
@@ -910,7 +911,7 @@ class _MedicineReminderScreenState extends State<MedicineReminderScreen> {
                                                         const Icon(Icons.check_rounded, size: 15, color: Color(0xFF0A6847)),
                                                         const SizedBox(width: 5),
                                                         Text(
-                                                          isBangla ? 'খেয়েছি (Mark Taken)' : 'Mark as Taken',
+                                                          strings.markTakenAction,
                                                           style: const TextStyle(fontSize: 12, color: Color(0xFF0A6847), fontWeight: FontWeight.bold),
                                                         ),
                                                       ],

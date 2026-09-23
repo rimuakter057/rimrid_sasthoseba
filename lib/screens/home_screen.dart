@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // Medicine Reminder Alarm Shortcut
               IconButton(
                 icon: const Icon(Icons.alarm_on_rounded, color: Colors.white, size: 22),
-                tooltip: isBangla ? 'ওষুধের রিমাইন্ডার' : 'Medicine Reminders',
+                tooltip: strings.medicineReminderTooltip,
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -170,35 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
 
               // Language Switcher Toggle Button (বাং / EN)
-              InkWell(
-                onTap: () {
-                  LanguageController.instance.toggleLanguage();
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.translate_rounded, color: Colors.white, size: 16),
-                      const SizedBox(width: 5),
-                      Text(
-                        isBangla ? 'EN' : 'বাং',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              const Center(child: LanguageToggleButton()),
               const SizedBox(width: 14),
             ],
           ),
