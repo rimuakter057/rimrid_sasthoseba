@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "250000519124",
+    "project_id": "rimrid-sasthoseba",
+    "storage_bucket": "rimrid-sasthoseba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:250000519124:android:7eaaad430529af1b36b041",
+        "android_client_info": {
+          "package_name": "com.example.rimrid_sasthoseba"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwW0vB7fEcxirSlKNOXK1E2lF8AK-JPz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
