@@ -29,7 +29,7 @@ class _EmergencySosScreenState extends State<EmergencySosScreen> {
     });
   }
 
-  Future<void> _saveGuardianPhone(String phone) async {
+  Future<void> _saveGuardianPhone(String phone, AppStrings strings) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('emergency_guardian_phone', phone.trim());
     setState(() {
@@ -38,44 +38,44 @@ class _EmergencySosScreenState extends State<EmergencySosScreen> {
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('জরুরি অভিভাবকের নম্বর সংরক্ষণ করা হয়েছে')),
+        SnackBar(content: Text(strings.sosGuardianSavedMessage)),
       );
     }
   }
 
-  Future<void> _callNumber(String phone) async {
+  Future<void> _callNumber(String phone, AppStrings strings) async {
     final uri = Uri.parse('tel:$phone');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('কল করা যায়নি: $phone')),
+          SnackBar(content: Text(strings.sosCallFailedMessage(phone))),
         );
       }
     }
   }
 
-  void _showSetGuardianDialog() {
+  void _showSetGuardianDialog(AppStrings strings) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('জরুরি পরিচিতজনের নম্বর'),
+          title: Text(strings.sosGuardianDialogTitle),
           content: TextField(
             controller: _guardianController,
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              hintText: 'মোবাইল নম্বর লিখুন (যেমন: 017XXXXXXXX)',
-              prefixIcon: Icon(Icons.phone),
+            decoration: InputDecoration(
+              hintText: strings.sosGuardianPhoneHint,
+              prefixIcon: const Icon(Icons.phone),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('বাতিল')),
+            TextButton(onPressed: () => Navigator.pop(context), child: Text(strings.cancel)),
             ElevatedButton(
-              onPressed: () => _saveGuardianPhone(_guardianController.text),
+              onPressed: () => _saveGuardianPhone(_guardianController.text, strings),
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFDC2626), foregroundColor: Colors.white),
-              child: const Text('সংরক্ষণ করুন'),
+              child: Text(strings.saveAction),
             ),
           ],
         );
@@ -89,16 +89,21 @@ class _EmergencySosScreenState extends State<EmergencySosScreen> {
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
 
         return Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
             backgroundColor: const Color(0xFFDC2626),
             title: Text(
-              isBangla ? 'জরুরি এসওএস ও হেল্পলাইন' : 'Emergency SOS & Hotlines',
+              strings.sosScreenTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             elevation: 0,
+            actions: const [
+              LanguageToggleButton(),
+              SizedBox(width: 8),
+            ],
           ),
           body: ListView(
             padding: const EdgeInsets.all(16),
@@ -114,7 +119,7 @@ class _EmergencySosScreenState extends State<EmergencySosScreen> {
                 child: Column(
                   children: [
                     InkWell(
-                      onTap: () => _callNumber('999'),
+                      onTap: () => _callNumber('999', strings),
                       borderRadius: BorderRadius.circular(75),
                       child: Container(
                         width: 140,
@@ -143,13 +148,13 @@ class _EmergencySosScreenState extends State<EmergencySosScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      isBangla ? 'জরুরি প্রয়োজনে এক ট্যাপে ৯৯৯ ডায়াল করুন' : 'Tap for instant 999 National Emergency',
+                      strings.sosBigButtonTapPrompt,
                       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF991B1B)),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      isBangla ? 'অ্যাম্বুলেন্স, পুলিশ বা ফায়ার সার্ভিস দ্রুত পৌঁছাবে' : 'Connects to ambulance, fire service, and police',
+                      strings.sosBigButtonServicesText,
                       style: const TextStyle(fontSize: 12, color: Color(0xFF7F1D1D)),
                       textAlign: TextAlign.center,
                     ),
@@ -177,11 +182,11 @@ class _EmergencySosScreenState extends State<EmergencySosScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isBangla ? 'পরিবারের জরুরি নম্বর' : 'Emergency Family Contact',
+                              strings.sosFamilyContactTitle,
                               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                             ),
                             Text(
-                              _guardianPhone.isNotEmpty ? _guardianPhone : (isBangla ? 'কোনো নম্বর সেট করা নেই' : 'No number saved'),
+                              _guardianPhone.isNotEmpty ? _guardianPhone : strings.sosNoNumberSaved,
                               style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                             ),
                           ],
@@ -190,11 +195,11 @@ class _EmergencySosScreenState extends State<EmergencySosScreen> {
                       if (_guardianPhone.isNotEmpty)
                         IconButton(
                           icon: const Icon(Icons.call_rounded, color: Colors.green, size: 28),
-                          onPressed: () => _callNumber(_guardianPhone),
+                          onPressed: () => _callNumber(_guardianPhone, strings),
                         ),
                       IconButton(
                         icon: const Icon(Icons.edit_rounded, color: Colors.grey),
-                        onPressed: _showSetGuardianDialog,
+                        onPressed: () => _showSetGuardianDialog(strings),
                       ),
                     ],
                   ),
@@ -204,7 +209,7 @@ class _EmergencySosScreenState extends State<EmergencySosScreen> {
 
               // National Emergency Hotlines List
               Text(
-                isBangla ? 'জরুরি সরকারি স্বাস্থ্য হটলাইনসমূহ:' : 'National Emergency Hotlines:',
+                strings.sosHotlinesListTitle,
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
               ),
               const SizedBox(height: 10),
@@ -229,13 +234,13 @@ class _EmergencySosScreenState extends State<EmergencySosScreen> {
                       style: const TextStyle(fontSize: 12),
                     ),
                     trailing: ElevatedButton(
-                      onPressed: () => _callNumber(contact.number),
+                      onPressed: () => _callNumber(contact.number, strings),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0A6847),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: Text(isBangla ? 'কল' : 'Call'),
+                      child: Text(strings.call),
                     ),
                   ),
                 );

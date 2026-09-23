@@ -17,16 +17,42 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
   final List<String> _bloodGroups = const ['সকল', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
   final List<String> _divisions = const ['সকল', 'ঢাকা', 'চট্টগ্রাম', 'রাজশাহী', 'সিলেট', 'খুলনা', 'বরিশাল', 'রংপুর', 'ময়মনসিংহ'];
 
-  Future<void> _makeCall(String phoneNumber) async {
+  Future<void> _makeCall(String phoneNumber, AppStrings strings) async {
     final uri = Uri.parse('tel:$phoneNumber');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('কল করা যায়নি: $phoneNumber')),
+          SnackBar(content: Text(strings.sosCallFailedMessage(phoneNumber))),
         );
       }
+    }
+  }
+
+  String _getDivisionLabel(String div, AppStrings strings) {
+    switch (div) {
+      case 'সকল':
+        return strings.divisionAll;
+      case 'ঢাকা':
+        return strings.divisionDhaka;
+      case 'চট্টগ্রাম':
+        return strings.divisionChittagong;
+      case 'রাজশাহী':
+        return strings.divisionRajshahi;
+      case 'সিলেট':
+        return strings.divisionSylhet;
+      case 'খুলনা':
+        return strings.divisionKhulna;
+      case 'বরিশাল':
+        return strings.divisionBarishal;
+      case 'রংপুর':
+        return strings.divisionRangpur;
+      case 'ময়মনসিংহ':
+      case 'ময়মনসিংহ':
+        return strings.divisionMymensingh;
+      default:
+        return div;
     }
   }
 
@@ -36,6 +62,7 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
 
         final filteredBanks = EmergencyData.verifiedBloodBanks.where((bank) {
           final matchesDiv = _selectedDivision == 'সকল' || bank.division == _selectedDivision;
@@ -48,10 +75,14 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
           appBar: AppBar(
             backgroundColor: const Color(0xFFB91C1C),
             title: Text(
-              isBangla ? 'জরুরি রক্তের সন্ধান ও ব্লাড ব্যাংক' : 'Emergency Blood Finder',
+              strings.bloodFinderTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             elevation: 0,
+            actions: const [
+              LanguageToggleButton(),
+              SizedBox(width: 8),
+            ],
           ),
           body: Column(
             children: [
@@ -64,7 +95,7 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
                   children: [
                     // Blood Group Horizontal Selector
                     Text(
-                      isBangla ? 'রক্তের গ্রুপ নির্বাচন করুন:' : 'Select Blood Group:',
+                      strings.bloodSelectGroup,
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
                     ),
                     const SizedBox(height: 8),
@@ -73,10 +104,11 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
                       child: Row(
                         children: _bloodGroups.map((group) {
                           final isSelected = _selectedGroup == group;
+                          final groupLabel = group == 'সকল' ? strings.all : group;
                           return Padding(
                             padding: const EdgeInsets.only(right: 6),
                             child: ChoiceChip(
-                              label: Text(group, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? Colors.white : const Color(0xFFB91C1C))),
+                              label: Text(groupLabel, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? Colors.white : const Color(0xFFB91C1C))),
                               selected: isSelected,
                               selectedColor: const Color(0xFFB91C1C),
                               backgroundColor: const Color(0xFFFEF2F2),
@@ -93,7 +125,7 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
                     Row(
                       children: [
                         Text(
-                          isBangla ? 'বিভাগ: ' : 'Division: ',
+                          strings.bloodSelectDivision,
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
                         ),
                         const SizedBox(width: 8),
@@ -109,7 +141,13 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
                                 value: _selectedDivision,
                                 isExpanded: true,
                                 items: _divisions.map((div) {
-                                  return DropdownMenuItem(value: div, child: Text(div, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)));
+                                  return DropdownMenuItem(
+                                    value: div,
+                                    child: Text(
+                                      _getDivisionLabel(div, strings),
+                                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                    ),
+                                  );
                                 }).toList(),
                                 onChanged: (val) {
                                   if (val != null) setState(() => _selectedDivision = val);
@@ -131,9 +169,7 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      isBangla
-                          ? 'ব্লাড ব্যাংক ও ডোনার সেন্টার (${filteredBanks.length} টি)'
-                          : 'Blood Centers Found (${filteredBanks.length})',
+                      strings.bloodCentersFound(filteredBanks.length),
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
                     ),
                   ],
@@ -145,7 +181,7 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
                 child: filteredBanks.isEmpty
                     ? Center(
                         child: Text(
-                          isBangla ? 'এই বিভাগে কোনো তথ্য পাওয়া যায়নি' : 'No blood centers found in this region',
+                          strings.bloodNoCentersInRegion,
                           style: const TextStyle(color: Colors.grey),
                         ),
                       )
@@ -186,7 +222,7 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
                                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
                                             ),
                                             Text(
-                                              '${bank.district}, ${bank.division}',
+                                              '${bank.district}, ${_getDivisionLabel(bank.division, strings)}',
                                               style: const TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                                             ),
                                           ],
@@ -213,10 +249,10 @@ class _BloodDirectoryScreenState extends State<BloodDirectoryScreen> {
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton.icon(
-                                      onPressed: () => _makeCall(bank.phone),
+                                      onPressed: () => _makeCall(bank.phone, strings),
                                       icon: const Icon(Icons.phone_rounded, size: 18),
                                       label: Text(
-                                        isBangla ? 'সরাসরি কল করুন (${bank.phone})' : 'Call Now (${bank.phone})',
+                                        strings.bloodCallDirect(bank.phone),
                                         style: const TextStyle(fontWeight: FontWeight.bold),
                                       ),
                                       style: ElevatedButton.styleFrom(

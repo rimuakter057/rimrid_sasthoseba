@@ -30,6 +30,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
 
         return Scaffold(
           body: IndexedStack(
@@ -60,23 +61,23 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               items: [
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.medication_rounded),
-                  label: isBangla ? 'ওষুধ' : 'Medicines',
+                  label: strings.navMedicines,
                 ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.compare_arrows_rounded),
-                  label: isBangla ? 'বিক্রিয়া' : 'Interactions',
+                  label: strings.navInteractions,
                 ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.biotech_rounded),
-                  label: isBangla ? 'ল্যাব টেস্ট' : 'Lab Tests',
+                  label: strings.navLabTests,
                 ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.health_and_safety_rounded),
-                  label: isBangla ? 'ফার্স্ট এইড' : 'First Aid',
+                  label: strings.navFirstAid,
                 ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.emergency_rounded),
-                  label: isBangla ? 'জরুরি সেবা' : 'Emergency',
+                  label: strings.navEmergency,
                 ),
               ],
             ),
