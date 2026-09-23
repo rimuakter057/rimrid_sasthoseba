@@ -86,8 +86,12 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.help_outline_rounded),
-                tooltip: 'সহায়িকা',
+                tooltip: strings.help,
                 onPressed: () => _showHelpDialog(strings),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Center(child: LanguageToggleButton()),
               ),
             ],
           ),
@@ -172,14 +176,14 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> {
               children: [
                 const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 16),
                 const SizedBox(width: 6),
-                const Text(
-                  'প্রেসক্রিপশন আপলোড করা হয়েছে',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF047857), fontWeight: FontWeight.w600),
+                Text(
+                  strings.isBangla ? 'প্রেসক্রিপশন আপলোড করা হয়েছে' : 'Prescription uploaded',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF047857), fontWeight: FontWeight.w600),
                 ),
                 const Spacer(),
                 TextButton(
-                  onPressed: () => _showRawOcrSheet(),
-                  child: const Text('মূল লেখা দেখুন (OCR)', style: TextStyle(fontSize: 12)),
+                  onPressed: () => _showRawOcrSheet(strings),
+                  child: Text(strings.isBangla ? 'মূল লেখা দেখুন (OCR)' : 'View Raw OCR', style: const TextStyle(fontSize: 12)),
                 ),
               ],
             ),
@@ -266,11 +270,23 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> {
             ),
             child: Column(
               children: [
-                _buildGuideRow(Icons.lightbulb_outline_rounded, 'পর্যাপ্ত আলোতে ছবি তুলুন', Colors.amber.shade700),
+                _buildGuideRow(
+                  Icons.lightbulb_outline_rounded,
+                  strings.isBangla ? 'পর্যাপ্ত আলোতে ছবি তুলুন' : 'Take photo in good lighting',
+                  Colors.amber.shade700,
+                ),
                 const Divider(height: 16),
-                _buildGuideRow(Icons.crop_free_rounded, 'প্রেসক্রিপশনটি সোজাভাবে ফ্রেমের মধ্যে রাখুন', Colors.blue.shade700),
+                _buildGuideRow(
+                  Icons.crop_free_rounded,
+                  strings.isBangla ? 'প্রেসক্রিপশনটি সোজাভাবে ফ্রেমের মধ্যে রাখুন' : 'Keep prescription straight in frame',
+                  Colors.blue.shade700,
+                ),
                 const Divider(height: 16),
-                _buildGuideRow(Icons.verified_outlined, 'অন-ডিভাইস অফলাইন স্ক্যানিং (নিরাপদ ও দ্রুত)', Colors.green.shade700),
+                _buildGuideRow(
+                  Icons.verified_outlined,
+                  strings.isBangla ? 'অন-ডিভাইস অফলাইন স্ক্যানিং (নিরাপদ ও দ্রুত)' : 'On-device offline scanning (secure & fast)',
+                  Colors.green.shade700,
+                ),
               ],
             ),
           ),
@@ -497,8 +513,8 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> {
                     MaterialPageRoute(
                       builder: (context) => MedicineReminderScreen(
                         initialMedicineName: med != null ? med.displayNameWithStrength : item.rawText,
-                        initialDosage: item.frequency.isNotEmpty ? item.frequency : '১টি',
-                        initialMealTiming: item.mealTiming.isNotEmpty ? item.mealTiming : 'খাবারের পরে',
+                        initialDosage: item.frequency.isNotEmpty ? item.frequency : (strings.isBangla ? '১টি' : '1 unit'),
+                        initialMealTiming: item.mealTiming.isNotEmpty ? item.mealTiming : strings.mealAfter,
                       ),
                     ),
                   );
@@ -582,7 +598,7 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> {
     );
   }
 
-  void _showRawOcrSheet() {
+  void _showRawOcrSheet(AppStrings strings) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -601,7 +617,10 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('OCR টেক্সট প্রিভিউ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    strings.ocrTextPreviewTitle,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
                 ],
               ),
@@ -609,7 +628,7 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   child: SelectableText(
-                    _rawOcrText ?? 'কোনো টেক্সট পাওয়া যায়নি',
+                    _rawOcrText ?? strings.labNoOcrText,
                     style: const TextStyle(fontSize: 14, fontFamily: 'monospace'),
                   ),
                 ),
@@ -625,16 +644,13 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('প্রেসক্রিপশন স্ক্যান সহায়িকা'),
-        content: const Text(
-          '১. ভালো আলোতে প্রেসক্রিপশনের স্পষ্ট ছবি তুলুন।\n'
-          '২. প্রিন্ট করা প্রেসক্রিপশন শতভাগ নির্ভুলভাবে পড়া যায়।\n'
-          '৩. শনাক্ত হওয়া যেকোনো ওষুধের উপর ট্যাপ করে তার সম্পূর্ণ খাওয়ার নিয়ম, জেনেরিক এবং পার্শ্বপ্রতিক্রিয়া দেখতে পারবেন।\n'
-          '৪. এটি সম্পূর্ণ অফলাইনে কাজ করে।',
-          style: TextStyle(height: 1.5),
+        title: Text(strings.prescriptionHelpTitle),
+        content: Text(
+          strings.prescriptionHelpBody,
+          style: const TextStyle(height: 1.5),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('ঠিক আছে')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(strings.ok)),
         ],
       ),
     );

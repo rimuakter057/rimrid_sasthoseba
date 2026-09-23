@@ -128,6 +128,7 @@ class _VaccinationTrackerScreenState extends State<VaccinationTrackerScreen> {
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
         final now = DateTime.now();
 
         return Scaffold(
@@ -135,10 +136,14 @@ class _VaccinationTrackerScreenState extends State<VaccinationTrackerScreen> {
           appBar: AppBar(
             backgroundColor: const Color(0xFF0A6847),
             title: Text(
-              isBangla ? 'শিশুর টিকাদান সূচি (EPI Tracker)' : 'Child EPI Vaccination Tracker',
+              strings.vaccineTrackerTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             elevation: 0,
+            actions: const [
+              LanguageToggleButton(),
+              SizedBox(width: 8),
+            ],
           ),
           body: Column(
             children: [
@@ -159,11 +164,11 @@ class _VaccinationTrackerScreenState extends State<VaccinationTrackerScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isBangla ? 'শিশুর জন্মতারিখ:' : 'Child Date of Birth:',
+                            strings.childBirthDateLabel,
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
                           ),
                           Text(
-                            _formatDate(_birthDate),
+                            strings.formatDate(_birthDate),
                             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                           ),
                         ],
@@ -172,7 +177,7 @@ class _VaccinationTrackerScreenState extends State<VaccinationTrackerScreen> {
                     OutlinedButton.icon(
                       onPressed: _pickBirthDate,
                       icon: const Icon(Icons.calendar_month_rounded, size: 18),
-                      label: Text(isBangla ? 'তারিখ পরিবর্তন' : 'Change Date'),
+                      label: Text(strings.changeDateBtn),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF0A6847),
                         side: const BorderSide(color: Color(0xFF0A6847)),
@@ -243,7 +248,7 @@ class _VaccinationTrackerScreenState extends State<VaccinationTrackerScreen> {
                                       Icon(Icons.event_rounded, size: 14, color: isOverdue ? Colors.red : const Color(0xFF0A6847)),
                                       const SizedBox(width: 4),
                                       Text(
-                                        '${isBangla ? 'নির্ধারিত তারিখ:' : 'Due:'} ${_formatDate(dueDate)}',
+                                        '${strings.dueDateLabel} ${strings.formatDate(dueDate)}',
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
@@ -256,7 +261,7 @@ class _VaccinationTrackerScreenState extends State<VaccinationTrackerScreen> {
                                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(color: Colors.red.shade100, borderRadius: BorderRadius.circular(4)),
                                           child: Text(
-                                            isBangla ? 'বাকি আছে' : 'Overdue',
+                                            strings.overdueTag,
                                             style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.red.shade900),
                                           ),
                                         ),

@@ -11,16 +11,21 @@ class FirstAidScreen extends StatelessWidget {
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
 
         return Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
             backgroundColor: const Color(0xFF0A6847),
             title: Text(
-              isBangla ? 'জরুরি প্রাথমিক চিকিৎসা (ফার্স্ট এইড)' : 'First Aid Lifesaver Guide',
+              strings.firstAidScreenTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             elevation: 0,
+            actions: const [
+              LanguageToggleButton(),
+              SizedBox(width: 8),
+            ],
           ),
           body: ListView.builder(
             padding: const EdgeInsets.all(16),

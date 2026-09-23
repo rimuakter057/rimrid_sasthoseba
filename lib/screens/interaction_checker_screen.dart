@@ -125,6 +125,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
         final alerts = InteractionService.instance.analyzeInteractions(_selectedMedicines);
         final hasQuery = _searchController.text.trim().isNotEmpty;
 
@@ -133,7 +134,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
           appBar: AppBar(
             backgroundColor: const Color(0xFF0A6847),
             title: Text(
-              isBangla ? 'ড্রাগ ইন্টারঅ্যাকশন চেকার' : 'Drug Interaction Checker',
+              strings.interactionTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             elevation: 0,
@@ -141,9 +142,11 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
               if (_selectedMedicines.isNotEmpty)
                 IconButton(
                   icon: const Icon(Icons.refresh_rounded),
-                  tooltip: isBangla ? 'সব মুছুন' : 'Clear all',
+                  tooltip: strings.clearAll,
                   onPressed: () => setState(() => _selectedMedicines.clear()),
                 ),
+              const LanguageToggleButton(),
+              const SizedBox(width: 8),
             ],
           ),
           body: Column(
@@ -165,9 +168,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isBangla
-                          ? 'একসাথে খাওয়ার ওষুধগুলো সার্চ করে যোগ করুন:'
-                          : 'Search and add medicines you take together:',
+                      strings.interactionSearchHeader,
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                     ),
                     const SizedBox(height: 10),
@@ -177,9 +178,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
                       onChanged: _onSearch,
                       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                       decoration: InputDecoration(
-                        hintText: isBangla
-                            ? 'ওষুধের নাম লিখুন (যেমন: Napa, Seclo, Histacin)...'
-                            : 'Type medicine name (e.g. Napa, Seclo)...',
+                        hintText: strings.interactionSearchHint,
                         hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade500, fontWeight: FontWeight.normal),
                         prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF0A6847)),
                         suffixIcon: hasQuery
@@ -209,7 +208,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
                       child: Row(
                         children: [
                           Text(
-                            isBangla ? 'দ্রুত যোগ করুন: ' : 'Quick add: ',
+                            strings.interactionQuickAdd,
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
                           ),
                           ..._quickSuggestions.map((name) {
@@ -250,14 +249,14 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
                           child: Row(
                             children: [
                               Text(
-                                '${_searchResults.length}টি ওষুধ পাওয়া গেছে',
+                                strings.interactionMatchesFound(_searchResults.length),
                                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF166534)),
                               ),
                               const Spacer(),
                               TextButton.icon(
                                 onPressed: _addAllSearchResults,
                                 icon: const Icon(Icons.done_all_rounded, size: 16),
-                                label: const Text('সবগুলো যোগ করুন', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                label: Text(strings.interactionAddAll, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                                 style: TextButton.styleFrom(foregroundColor: const Color(0xFF0A6847)),
                               ),
                             ],
@@ -288,7 +287,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
                                   : ElevatedButton.icon(
                                       onPressed: () => _addMedicine(med),
                                       icon: const Icon(Icons.add, size: 16),
-                                      label: Text(isBangla ? 'যোগ' : 'Add'),
+                                      label: Text(strings.add),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color(0xFF0A6847),
                                         foregroundColor: Colors.white,
@@ -315,9 +314,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          isBangla
-                              ? '"${_searchController.text}" পাওয়া যায়নি। বানান সঠিক আছে কিনা দেখুন (যেমন: saclo এর বদলে seclo লিখুন) অথবা কমা ছাড়া একটি একটি করে লিখুন।'
-                              : 'No medicines matched "${_searchController.text}". Check the spelling.',
+                          strings.interactionNotFound(_searchController.text),
                           style: TextStyle(fontSize: 12, color: Colors.amber.shade900, height: 1.3),
                         ),
                       ),
@@ -338,13 +335,13 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'নির্বাচিত ওষুধ (${_selectedMedicines.length} টি):',
+                            strings.interactionSelectedCount(_selectedMedicines.length),
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
                           ),
                           TextButton(
                             onPressed: () => setState(() => _selectedMedicines.clear()),
                             style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact),
-                            child: const Text('সব মুছুন', style: TextStyle(fontSize: 12, color: Colors.red)),
+                            child: Text(strings.clearAll, style: const TextStyle(fontSize: 12, color: Colors.red)),
                           ),
                         ],
                       ),
@@ -412,11 +409,11 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
               // Interaction Report Area
               Expanded(
                 child: _selectedMedicines.isEmpty
-                    ? _buildEmptyState(isBangla)
+                    ? _buildEmptyState(strings)
                     : _selectedMedicines.length == 1
-                        ? _buildAddAnotherHint(isBangla)
+                        ? _buildAddAnotherHint(strings)
                         : alerts.isEmpty
-                            ? _buildSafeState(isBangla)
+                            ? _buildSafeState(strings)
                             : _buildAlertsList(alerts, isBangla),
               ),
             ],
@@ -426,7 +423,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
     );
   }
 
-  Widget _buildEmptyState(bool isBangla) {
+  Widget _buildEmptyState(AppStrings strings) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -440,14 +437,12 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              isBangla ? 'ড্রাগ ইন্টারঅ্যাকশন পরীক্ষা করুন' : 'Check Drug Interactions',
+              strings.interactionEmptyTitle,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
             ),
             const SizedBox(height: 8),
             Text(
-              isBangla
-                  ? 'আপনি যে ওষুধগুলো একসাথে খান, সেগুলো উপরের সার্চবারে একটি একটি করে অথবা কমা (,) দিয়ে লিখে যোগ করুন। কোনো ক্ষতিকর বিক্রিয়া আছে কিনা তা আমরা পরীক্ষা করে দেব।'
-                  : 'Add two or more medicines to check if they interact with each other safely or have harmful conflicts.',
+              strings.interactionEmptyBody,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 13, color: Color(0xFF64748B), height: 1.4),
             ),
@@ -457,7 +452,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
     );
   }
 
-  Widget _buildAddAnotherHint(bool isBangla) {
+  Widget _buildAddAnotherHint(AppStrings strings) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -467,14 +462,12 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
             const Icon(Icons.add_circle_outline_rounded, size: 48, color: Colors.amber),
             const SizedBox(height: 14),
             Text(
-              isBangla ? 'আরও অন্তত ১টি ওষুধ যোগ করুন' : 'Add at least one more medicine',
+              strings.interactionAddAnotherTitle,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
             ),
             const SizedBox(height: 6),
             Text(
-              isBangla
-                  ? 'ইন্টারঅ্যাকশন বা বিক্রিয়া পরীক্ষা করতে কমপক্ষে ২টি ওষুধের প্রয়োজন হয়।'
-                  : 'At least 2 medications are required to analyze mutual drug interactions.',
+              strings.interactionAddAnotherBody,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
             ),
@@ -484,7 +477,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
     );
   }
 
-  Widget _buildSafeState(bool isBangla) {
+  Widget _buildSafeState(AppStrings strings) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -500,15 +493,13 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
               const Icon(Icons.verified_rounded, color: Color(0xFF16A34A), size: 46),
               const SizedBox(height: 10),
               Text(
-                isBangla ? 'কোনো পরিচিত মারাত্মক সংঘাত পাওয়া যায়নি' : 'No Known Severe Conflicts Detected',
+                strings.interactionSafeTitle,
                 style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF15803D)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                isBangla
-                    ? 'আমাদের ডাটাবেজের ২২+ টি প্রধান ক্লিনিক্যাল ক্লাস ও জেনেরিকের মেডিকেল নিয়মের ভিত্তিতে আপনার নির্বাচিত ${_selectedMedicines.length}টি ওষুধের মধ্যে কোনো পরিচিত মারাত্মক বিক্রিয়া বা দ্বন্দ্ব নেই।'
-                    : 'Based on 22+ primary clinical classes and drug interaction rules, no known critical conflicts were found among your selected ${_selectedMedicines.length} medicines.',
+                strings.interactionSafeBody(_selectedMedicines.length),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, color: Color(0xFF166534), height: 1.4),
               ),
@@ -534,14 +525,12 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isBangla ? 'মেডিকেল সতর্কতা ও পরামর্শ' : 'Medical Safety Note',
+                      strings.interactionMedicalNoteTitle,
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF92400E)),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      isBangla
-                          ? 'এই অ্যাপটি একটি বৈজ্ঞানিক সহায়ক নির্দেশিকা এবং কখনোই ডাক্তারের সরাসরি পরামর্শের বিকল্প নয়। প্রতিটি মানুষের বয়স, কিডনি বা লিভারের অবস্থা অনুযায়ী ওষুধের প্রভাব ভিন্ন হতে পারে। নতুন কোনো ওষুধ শুরু করার আগে সর্বদা চিকিৎসকের প্রেসক্রিপশন মেনে চলুন।'
-                          : 'This tool is a clinical guide and does not substitute a licensed physician. Individual tolerance varies based on age, renal, and liver conditions. Always follow your doctor\'s prescription.',
+                      strings.interactionMedicalNoteBody,
                       style: const TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.35),
                     ),
                   ],
