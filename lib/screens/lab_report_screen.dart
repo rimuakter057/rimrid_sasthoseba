@@ -79,6 +79,21 @@ class _LabReportScreenState extends State<LabReportScreen> with SingleTickerProv
     });
   }
 
+  String _getCategoryTitle(String cat, bool isBangla) {
+    if (cat == 'সব') return isBangla ? 'সব' : 'All';
+    if (!isBangla) {
+      if (cat.contains('CBC')) return 'Blood (CBC)';
+      if (cat.contains('KFT')) return 'Kidney (KFT)';
+      if (cat.contains('LFT')) return 'Liver (LFT)';
+      if (cat.contains('ডায়াবেটিস')) return 'Diabetes';
+      if (cat.contains('কোলেস্টেরল')) return 'Lipid Profile';
+      if (cat.contains('থাইরয়েড')) return 'Thyroid';
+      if (cat.contains('ইলেক্ট্রোলাইট')) return 'Electrolytes';
+      if (cat.contains('ইউরিন')) return 'Urine (R/E)';
+    }
+    return cat;
+  }
+
   void _onSelectManualTest(LabTestDefinition test) {
     setState(() {
       _selectedTest = test;
@@ -250,16 +265,21 @@ TSH                               6.5       uIU/mL    (0.4 - 4.2)
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
 
         return Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
             backgroundColor: const Color(0xFF0A6847),
             title: Text(
-              isBangla ? 'ল্যাব টেস্ট ও রিপোর্ট অ্যানালাইজার' : 'Lab Test & Report Analyzer',
+              strings.labReportTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             elevation: 0,
+            actions: const [
+              LanguageToggleButton(),
+              SizedBox(width: 8),
+            ],
             bottom: TabBar(
               controller: _tabController,
               indicatorColor: Colors.white,
@@ -270,11 +290,11 @@ TSH                               6.5       uIU/mL    (0.4 - 4.2)
               tabs: [
                 Tab(
                   icon: const Icon(Icons.document_scanner_rounded, size: 20),
-                  text: isBangla ? 'কাগজের রিপোর্ট স্ক্যান' : 'Scan Lab Report',
+                  text: strings.labScanTab,
                 ),
                 Tab(
                   icon: const Icon(Icons.biotech_rounded, size: 20),
-                  text: isBangla ? 'টেস্ট ডিরেক্টরি (২০+)' : 'Test Directory (20+)',
+                  text: strings.labDirectoryTab,
                 ),
               ],
             ),
@@ -932,7 +952,7 @@ TSH                               6.5       uIU/mL    (0.4 - 4.2)
                   padding: const EdgeInsets.only(right: 6),
                   child: FilterChip(
                     label: Text(
-                      cat,
+                      _getCategoryTitle(cat, isBangla),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,

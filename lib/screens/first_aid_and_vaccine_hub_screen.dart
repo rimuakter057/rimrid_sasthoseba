@@ -12,16 +12,21 @@ class FirstAidAndVaccineHubScreen extends StatelessWidget {
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
 
         return Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
             backgroundColor: const Color(0xFF0A6847),
             title: Text(
-              isBangla ? 'প্রাথমিক চিকিৎসা ও শিশু স্বাস্থ্য' : 'First Aid & Child Health',
+              strings.firstAidHubTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             elevation: 0,
+            actions: const [
+              LanguageToggleButton(),
+              SizedBox(width: 8),
+            ],
           ),
           body: ListView(
             padding: const EdgeInsets.all(18),
@@ -29,10 +34,9 @@ class FirstAidAndVaccineHubScreen extends StatelessWidget {
               // 1. First Aid Card
               _buildFeatureCard(
                 context,
-                title: isBangla ? 'জরুরি প্রাথমিক চিকিৎসা (ফার্স্ট এইড)' : 'Emergency First Aid Guide',
-                subtitle: isBangla
-                    ? 'আগুনে পোড়া, সাপে কাটা, গলায় কিছু আটকে যাওয়া ও স্ট্রোকের লক্ষণ চেনার ১০০% অফলাইন নির্দেশিকা।'
-                    : '100% offline lifesaver guidelines for burns, snake bite, choking, and stroke.',
+                title: strings.firstAidGuideCardTitle,
+                subtitle: strings.firstAidGuideCardSubtitle,
+                enterText: strings.enter,
                 icon: Icons.medical_services_rounded,
                 iconColor: const Color(0xFF0A6847),
                 bgColor: const Color(0xFFE8F5E9),
@@ -43,10 +47,9 @@ class FirstAidAndVaccineHubScreen extends StatelessWidget {
               // 2. Child Vaccination Tracker Card
               _buildFeatureCard(
                 context,
-                title: isBangla ? 'শিশুর টিকাদান সূচি (EPI Tracker)' : 'Child EPI Vaccination Tracker',
-                subtitle: isBangla
-                    ? 'জন্মের সময় থেকে ১৫ মাস পর্যন্ত সরকারি নিয়মে সব টিকার তারিখ গণনা ও সম্পূর্ণ করার ট্র্যাকার।'
-                    : 'Track mandatory child vaccination dates from birth up to 15 months.',
+                title: strings.childVaccineCardTitle,
+                subtitle: strings.childVaccineCardSubtitle,
+                enterText: strings.enter,
                 icon: Icons.child_care_rounded,
                 iconColor: Colors.pink.shade700,
                 bgColor: Colors.pink.shade50,
@@ -63,6 +66,7 @@ class FirstAidAndVaccineHubScreen extends StatelessWidget {
     BuildContext context, {
     required String title,
     required String subtitle,
+    required String enterText,
     required IconData icon,
     required Color iconColor,
     required Color bgColor,
@@ -96,7 +100,7 @@ class FirstAidAndVaccineHubScreen extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'প্রবেশ করুন',
+                          enterText,
                           style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: iconColor),
                         ),
                         const SizedBox(width: 4),

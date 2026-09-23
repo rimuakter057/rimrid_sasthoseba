@@ -104,6 +104,20 @@ class MedicineReminder {
     return 'রাত';
   }
 
+  /// English slot title
+  String get slotEnglish {
+    if (isMorning) return 'Morning';
+    if (isNoon) return 'Noon';
+    if (isNight) return 'Night';
+    if (timeHour < 12) return 'Morning';
+    if (timeHour < 16) return 'Afternoon';
+    if (timeHour < 19) return 'Evening';
+    return 'Night';
+  }
+
+  /// Localized slot title
+  String slot(bool isBangla) => isBangla ? slotBangla : slotEnglish;
+
   bool isTakenToday(DateTime now) {
     if (lastTakenDate == null) return false;
     final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';

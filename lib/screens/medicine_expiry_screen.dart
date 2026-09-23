@@ -80,21 +80,21 @@ class _MedicineExpiryScreenState extends State<MedicineExpiryScreen> {
     _saveCabinet();
   }
 
-  void _showAddDialog(BuildContext context, bool isBangla) {
+  void _showAddDialog(BuildContext context, AppStrings strings) {
     DateTime tempExp = DateTime.now().add(const Duration(days: 180));
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(isBangla ? 'গৃহস্থালী ওষুধ যোগ করুন' : 'Add Medicine to Cabinet'),
+          title: Text(strings.addCabinetDialogTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: isBangla ? 'ওষুধের নাম (যেমন: Napa 500mg)' : 'Medicine Name',
+                  labelText: strings.medNameLabel,
                   border: const OutlineInputBorder(),
                 ),
               ),
@@ -103,12 +103,12 @@ class _MedicineExpiryScreenState extends State<MedicineExpiryScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${isBangla ? 'মেয়াদ শেষ:' : 'Expiry:'} ${tempExp.month}/${tempExp.year}',
+                    '${strings.expiryLabel} ${strings.formatNumber(tempExp.month)}/${strings.formatNumber(tempExp.year)}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   TextButton.icon(
                     icon: const Icon(Icons.calendar_month),
-                    label: Text(isBangla ? 'তারিখ দিন' : 'Set Date'),
+                    label: Text(strings.setDateBtn),
                     onPressed: () async {
                       final picked = await showDatePicker(
                         context: context,
@@ -126,11 +126,11 @@ class _MedicineExpiryScreenState extends State<MedicineExpiryScreen> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(isBangla ? 'বাতিল' : 'Cancel')),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(strings.cancel)),
             ElevatedButton(
               onPressed: () => _addItem(_nameController.text, tempExp),
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0A6847), foregroundColor: Colors.white),
-              child: Text(isBangla ? 'যোগ করুন' : 'Add'),
+              child: Text(strings.addAction),
             ),
           ],
         ),
@@ -144,6 +144,7 @@ class _MedicineExpiryScreenState extends State<MedicineExpiryScreen> {
       listenable: LanguageController.instance,
       builder: (context, _) {
         final isBangla = LanguageController.instance.isBangla;
+        final strings = AppStrings(isBangla);
         final now = DateTime.now();
 
         return Scaffold(
@@ -151,17 +152,21 @@ class _MedicineExpiryScreenState extends State<MedicineExpiryScreen> {
           appBar: AppBar(
             backgroundColor: const Color(0xFF0A6847),
             title: Text(
-              isBangla ? 'ঘরের ওষুধের মেয়াদোত্তীর্ণ ট্র্যাকার' : 'Medicine Expiry Tracker',
+              strings.expiryTrackerTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             elevation: 0,
+            actions: const [
+              LanguageToggleButton(),
+              SizedBox(width: 8),
+            ],
           ),
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showAddDialog(context, isBangla),
+            onPressed: () => _showAddDialog(context, strings),
             backgroundColor: const Color(0xFF0A6847),
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add_rounded),
-            label: Text(isBangla ? 'নতুন ওষুধ যোগ' : 'Add Medicine'),
+            label: Text(strings.addMedicineFab),
           ),
           body: _cabinetItems.isEmpty
               ? Center(
@@ -173,14 +178,12 @@ class _MedicineExpiryScreenState extends State<MedicineExpiryScreen> {
                         const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
                         const SizedBox(height: 16),
                         Text(
-                          isBangla ? 'আপনার ঘরের বক্স খালি' : 'Your cabinet is empty',
+                          strings.emptyCabinetTitle,
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          isBangla
-                              ? 'বাসার ড্রয়ার বা বক্সে রাখা ওষুধের নাম ও এক্সপায়ারি ডেট যোগ করুন। মেয়াদ শেষ হওয়ার আগে অ্যাপ সতর্ক করবে।'
-                              : 'Add medicines stored at home with their expiry dates to track safety.',
+                          strings.emptyCabinetSubtitle,
                           textAlign: TextAlign.center,
                           style: const TextStyle(fontSize: 13, color: Colors.grey),
                         ),
@@ -200,18 +203,18 @@ class _MedicineExpiryScreenState extends State<MedicineExpiryScreen> {
                     Color statusBg = const Color(0xFFF0FDF4);
                     Color statusBorder = const Color(0xFFBBF7D0);
                     Color statusColor = const Color(0xFF16A34A);
-                    String statusText = isBangla ? 'মেয়াদ ঠিক আছে' : 'Good';
+                    String statusText = strings.statusGood;
 
                     if (isExpired) {
                       statusBg = const Color(0xFFFEF2F2);
                       statusBorder = const Color(0xFFFECACA);
                       statusColor = const Color(0xFFDC2626);
-                      statusText = isBangla ? 'মেয়াদোত্তীর্ণ (ফেলে দিন)' : 'Expired! Discard';
+                      statusText = strings.statusExpired;
                     } else if (isExpiringSoon) {
                       statusBg = const Color(0xFFFFFBEB);
                       statusBorder = const Color(0xFFFDE68A);
                       statusColor = const Color(0xFFD97706);
-                      statusText = isBangla ? 'শীঘ্রই শেষ হবে ($daysLeft দিন)' : 'Expiring ($daysLeft days)';
+                      statusText = strings.statusExpiringSoon(daysLeft);
                     }
 
                     return Card(
@@ -237,7 +240,7 @@ class _MedicineExpiryScreenState extends State<MedicineExpiryScreen> {
                           ),
                         ),
                         subtitle: Text(
-                          '${isBangla ? 'মেয়াদ:' : 'Expiry:'} ${item.expiryDate.month}/${item.expiryDate.year} • $statusText',
+                          '${strings.expiryLabel} ${strings.formatNumber(item.expiryDate.month)}/${strings.formatNumber(item.expiryDate.year)} • $statusText',
                           style: TextStyle(fontWeight: FontWeight.w600, color: statusColor, fontSize: 13),
                         ),
                         trailing: IconButton(
